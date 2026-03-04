@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>DropFlow — crypto dropshipping with NFT</title>
+    <meta name="description" content="Telegram store in 5 min + NFT guarantees + P2P exchanger. AI-powered dropshipping on TON.">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300..700&family=Space+Grotesk:wght@300..700&display=swap');
+
+        /* ----- MODERN DARK THEME (clean, glass, high contrast) ----- */
+        :root {
+            --bg-depth-1: #03050a;
+            --bg-depth-2: #0e121b;
+            --bg-depth-3: #1a1f2c;
+            --glass-bg: rgba(18, 25, 40, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --accent-soft: #818cf8;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #475569;
+            --card-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5);
+            --transition: all 0.2s ease;
+        }
+
+        body {
+            font-family: 'Inter', 'Space Grotesk', sans-serif;
+            background-color: var(--bg-depth-1);
+            color: var(--text-primary);
+            overscroll-behavior: none;
+            -webkit-tap-highlight-color: transparent;
+            line-height: 1.5;
+            min-height: 100vh;
+            padding-bottom: 90px; /* space for bottom nav */
+        }
+
+        /* ----- glassmorphism base ----- */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            box-shadow: 0 15px 35px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card-thin {
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+        }
+
+        /* ----- typography ----- */
+        h1, h2, h3, .heading {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #a5b4fc, #c084fc, #f9a8d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .balance-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        /* ----- buttons ----- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 40px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+            box-shadow: 0 10px 20px -5px var(--accent-glow);
+            border: none;
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px var(--accent-glow);
+        }
+
+        .btn-outline {
+            border: 1.5px solid rgba(255,255,255,0.1);
+            background: transparent;
+        }
+
+        /* ----- bottom navigation (clean glass) ----- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            max-width: 480px;
+            margin: 0 auto;
+            background: rgba(10, 15, 25, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 36px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 20px 40px -10px black;
+            z-index: 50;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            padding: 8px 12px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .nav-item i {
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+        }
+        .nav-item.active {
+            color: white;
+            background: rgba(99, 102, 241, 0.15);
+        }
+        .nav-item .nav-label {
+            font-size: 0.7rem;
+        }
+
+        #create-button {
+            background: linear-gradient(135deg, #4f46e5, #a855f7);
+            width: 56px;
+            height: 56px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.6rem;
+            box-shadow: 0 10px 20px -3px #4f46e580;
+            margin-top: -20px;
+            transition: var(--transition);
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        #create-button:hover {
+            transform: scale(1.05) rotate(90deg);
+        }
+
+        /* ----- cards & containers ----- */
+        .container-padded {
+            padding: 20px 16px 100px 16px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* stats grid */
+        .stat-card {
+            background: rgba(25, 35, 55, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 24px;
+            padding: 20px 16px;
+        }
+
+        /* nft cards */
+        .nft-card-modern {
+            background: linear-gradient(145deg, #1a2332, #0f172a);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 24px;
+            padding: 12px;
+            transition: var(--transition);
+        }
+        .nft-card-modern:hover {
+            border-color: var(--accent);
+            box-shadow: 0 10px 25px -5px var(--accent-glow);
+        }
+
+        /* notifications */
+        .notification-item {
+            background: rgba(255,255,255,0.02);
+            border-radius: 20px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border-left: 4px solid transparent;
+        }
+        .notification-item.unread {
+            border-left-color: var(--accent);
+            background: rgba(99,102,241,0.05);
+        }
+
+        /* modals — lighter for contrast */
+        .modal-overlay {
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+        }
+        .modal-content-modern {
+            background: #1e2a3a;
+            border-radius: 32px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 40px 70px -10px black;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+        }
+
+        /* inputs */
+        .input-modern {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 60px;
+            padding: 14px 18px;
+            color: white;
+            font-size: 1rem;
+            width: 100%;
+            transition: var(--transition);
+        }
+        .input-modern:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        /* scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
+
+        /* animations */
+        @keyframes gentle-pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .pulse-gentle {
+            animation: gentle-pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container-padded"></div>
+
+    <!-- CREATE POPUP (glass) -->
+    <div id="create-popup" class="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 hidden w-[340px] glass-card p-5">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg flex items-center gap-2">
+                <i class="fas fa-magic text-indigo-400"></i> Create new
+            </h3>
+            <button id="close-create-popup" class="text-gray-400 hover:text-white p-2">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <button data-type="telegram-store" class="bg-indigo-950/40 hover:bg-indigo-900/50 rounded-2xl p-4 flex flex-col items-center transition border border-indigo-500/20">
+                <div class="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center mb-2"><i class="fab fa-telegram text-xl"></i></div>
+                <span class="text-sm font-medium">Telegram Store</span>
+            </button>
+            <button data-type="store" class="bg-indigo-950/40 hover:bg-indigo-900/50 rounded-2xl p-4 flex flex-col items-center transition border border-indigo-500/20">
+                <div class="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center mb-2"><i class="fas fa-store text-xl"></i></div>
+                <span class="text-sm font-medium">Regular Store</span>
+            </button>
+            <button data-type="product" class="bg-indigo-950/40 hover:bg-indigo-900/50 rounded-2xl p-4 flex flex-col items-center transition border border-indigo-500/20">
+                <div class="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center mb-2"><i class="fas fa-tag text-xl"></i></div>
+                <span class="text-sm font-medium">Product</span>
+            </button>
+            <button data-type="promo" class="bg-indigo-950/40 hover:bg-indigo-900/50 rounded-2xl p-4 flex flex-col items-center transition border border-indigo-500/20">
+                <div class="w-12 h-12 rounded-full bg-amber-600 flex items-center justify-center mb-2"><i class="fas fa-percentage text-xl"></i></div>
+                <span class="text-sm font-medium">Promotion</span>
+            </button>
+            <button data-type="nft" class="bg-indigo-950/40 hover:bg-indigo-900/50 rounded-2xl p-4 flex flex-col items-center transition border border-indigo-500/20 col-span-2">
+                <div class="w-12 h-12 rounded-full bg-emerald-600 flex items-center justify-center mb-2"><i class="fas fa-gem text-xl"></i></div>
+                <span class="text-sm font-medium">NFT Reward</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODALS (same structure, but restyled via CSS) -->
+    <!-- Telegram Store Modal -->
+    <div id="telegram-store-creation-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="modal-content-modern">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fab fa-telegram text-blue-400"></i> Create Telegram Store</h3>
+                <button id="close-telegram-store-modal" class="p-2 rounded-full hover:bg-white/10"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-300">Store Name</label>
+                    <input type="text" class="input-modern" placeholder="My Telegram Shop">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-300">Bot Username</label>
+                    <div class="flex">
+                        <input type="text" class="input-modern rounded-r-none" placeholder="mytelegramshop_bot">
+                        <span class="bg-gray-700 px-3 flex items-center rounded-r-2xl border border-l-0 border-white/10 text-sm">.t.me/</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" class="w-4 h-4 accent-indigo-500" checked>
+                        <span class="text-sm text-gray-300">Connect with DropFlow backend</span>
+                    </label>
+                </div>
+                <button class="btn btn-primary w-full py-3"><i class="fab fa-telegram mr-2"></i> Create Telegram Store</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NFT Creation Modal -->
+    <div id="nft-creation-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="modal-content-modern">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-gem text-purple-400"></i> Mint NFT Reward</h3>
+                <button id="close-nft-modal" class="p-2 rounded-full hover:bg-white/10"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+                <input type="text" class="input-modern" placeholder="NFT name (e.g. VIP Pass)">
+                <textarea class="input-modern h-24" placeholder="Description..."></textarea>
+                <input type="text" class="input-modern" placeholder="Boxberry tracking number">
+                <div class="grid grid-cols-3 gap-2">
+                    <button class="nft-design-option bg-gradient-to-br from-purple-500 to-pink-500 h-14 rounded-xl" data-rarity="common"></button>
+                    <button class="nft-design-option bg-gradient-to-br from-blue-500 to-cyan-500 h-14 rounded-xl" data-rarity="uncommon"></button>
+                    <button class="nft-design-option bg-gradient-to-br from-green-500 to-emerald-500 h-14 rounded-xl" data-rarity="rare"></button>
+                    <button class="nft-design-option bg-gradient-to-br from-yellow-500 to-orange-500 h-14 rounded-xl" data-rarity="epic"></button>
+                    <button class="nft-design-option bg-gradient-to-br from-red-500 to-pink-500 h-14 rounded-xl" data-rarity="legendary"></button>
+                    <button class="nft-design-option bg-gradient-to-br from-indigo-500 to-purple-500 h-14 rounded-xl" data-rarity="mythic"></button>
+                </div>
+                <div class="flex justify-between text-sm"><span>Rarity: <span id="nft-rarity-display">Common</span></span><span>Animation: <span id="nft-animation-display">None</span></span></div>
+                <select class="input-modern">
+                    <option>TON (The Open Network)</option>
+                    <option>Ethereum</option>
+                </select>
+                <button class="btn btn-primary w-full py-3"><i class="fas fa-magic mr-2"></i> Mint on TON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Store Creation Modal -->
+    <div id="store-creation-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="modal-content-modern">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-4">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-store text-indigo-400"></i> Create Store</h3>
+                <button id="close-store-modal" class="p-2 rounded-full hover:bg-white/10"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+                <input type="text" class="input-modern" placeholder="Store name">
+                <select class="input-modern">
+                    <option>Fashion</option><option>Electronics</option><option>Home</option>
+                </select>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3"><div class="w-16 h-16 rounded-2xl bg-gray-700 border-2 border-dashed border-gray-500 flex items-center justify-center"><i class="fas fa-image text-gray-400"></i></div><span class="text-sm text-gray-400">Upload logo</span></div>
+                    <button class="btn btn-outline py-2 px-4">Select</button>
+                </div>
+                <label class="flex items-center gap-2"><input type="checkbox" class="accent-indigo-500" checked> <span class="text-sm">Enable crypto payments</span></label>
+                <button class="btn btn-primary w-full py-3"><i class="fas fa-plus mr-2"></i> Create Store</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI ANALYSIS MODAL -->
+    <div id="ai-analysis-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center p-4">
+        <div class="modal-content-modern max-w-sm">
+            <div class="flex justify-between items-center border-b border-white/10 pb-3 mb-3">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-robot text-indigo-400"></i> AI insights</h3>
+                <button class="close-ai-modal p-2 rounded-full hover:bg-white/10"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4 max-h-[70vh] overflow-auto pr-1">
+                <div class="bg-indigo-950/30 rounded-2xl p-4">
+                    <h4 class="font-semibold mb-2">📈 Recommendations</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex justify-between"><span>Add wireless chargers</span><span class="text-green-400">+28% profit</span></li>
+                        <li class="flex justify-between"><span>Adjust Bluetooth speaker</span><span class="text-amber-400">+12% revenue</span></li>
+                    </ul>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="ai-action-btn btn-outline py-2 text-sm" data-action="add-product"><i class="fas fa-plus mr-1"></i>Add product</button>
+                    <button class="ai-action-btn btn-outline py-2 text-sm" data-action="adjust-prices"><i class="fas fa-tags mr-1"></i>Adjust prices</button>
+                </div>
+                <div class="bg-gray-800/60 rounded-2xl p-3 text-sm">
+                    <p class="text-gray-300">💬 AI: Based on trends, I recommend adding wireless chargers. They're up 142% in your region.</p>
+                </div>
+                <div class="flex">
+                    <input type="text" placeholder="Ask AI anything..." class="input-modern rounded-r-none flex-1">
+                    <button class="bg-indigo-600 rounded-r-2xl px-5"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Telegram init
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            if (tg.themeParams) {
+                document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#03050a');
+                document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#f1f5f9');
+            }
+
+            // App state (same as before)
+            const appState = {
+                aiSuggestions: [ /* ... */ ],
+                currentPage: 'dashboard',
+                user: {
+                    id: tg.initDataUnsafe.user?.id || '12345',
+                    name: tg.initDataUnsafe.user?.first_name || 'Alex',
+                    balance: 15423,
+                    cryptoBalance: 287.34,
+                    username: tg.initDataUnsafe.user?.username || 'dropflow_user',
+                    isVerified: true,
+                },
+                stores: [{ id:1, name:"Tech Galaxy", category:"Electronics", products:42, sales:128, rating:4.7 }],
+                portfolio: {
+                    value: 287.34,
+                    coins: [
+                        {name:"DropCoin", amount:18.45, value:287.34, symbol:"DRP"},
+                        {name:"Bitcoin", amount:0.0023, value:83.15, symbol:"BTC"},
+                        {name:"Ethereum", amount:0.045, value:86.50, symbol:"ETH"}
+                    ],
+                    transactions: [
+                        {id:1, date:"2023-07-15", amount:"+$250.00", name:"Store Sale #1287", status:"completed"},
+                        {id:2, date:"2023-07-14", amount:"-$50.00", name:"Product Restock", status:"completed"},
+                    ]
+                },
+                marketItems: [
+                    {id:1, name:"Wireless Earbuds", price:"$49.99", store:"Tech Galaxy", sales:120, profit:"$12"},
+                    {id:2, name:"Smart Watch", price:"$129.99", store:"Gadget Hub", sales:89, profit:"$20"},
+                ],
+                notifications: [
+                    {id:1, title:"New order received", desc:"Order #1290 for Wireless Earbuds", time:"2 min ago", read:false},
+                    {id:2, title:"Payment processed", desc:"$129.99 payment received", time:"1 hour ago", read:true},
+                ]
+            };
+
+            // ---------- ROUTER ----------
+            const routes = {
+                dashboard: renderDashboard,
+                market: renderMarket,
+                wallet: renderWallet,
+                settings: renderSettings,
+                profile: renderProfile,
+                store: renderStore,
+                product: renderProduct
+            };
+
+            function navigate(page, params = {}) {
+                appState.currentPage = page;
+                appState.pageParams = params;
+                renderApp();
+                window.scrollTo(0, 0);
+            }
+
+            // render functions (same content, but use new CSS classes; we'll keep structure but adapt classes)
+            // We'll rewrite render functions with modern classes
+
+            function renderNavBar(activePage) {
+                return `
+                    <nav class="bottom-nav">
+                        <button data-navigate="dashboard" class="nav-item ${activePage === 'dashboard' ? 'active' : ''}">
+                            <i class="fas fa-home"></i>
+                            <span class="nav-label">Home</span>
+                        </button>
+                        <button data-navigate="market" class="nav-item ${activePage === 'market' ? 'active' : ''}">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span class="nav-label">Market</span>
+                        </button>
+                        <button id="create-button" class="nav-item">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button data-navigate="wallet" class="nav-item ${activePage === 'wallet' ? 'active' : ''}">
+                            <i class="fas fa-wallet"></i>
+                            <span class="nav-label">Wallet</span>
+                        </button>
+                        <button data-navigate="settings" class="nav-item ${activePage === 'settings' ? 'active' : ''}">
+                            <i class="fas fa-cog"></i>
+                            <span class="nav-label">Settings</span>
+                        </button>
+                    </nav>
+                `;
+            }
+
+            function renderDashboard() {
+                return `
+                    <header class="flex justify-between items-center mb-6">
+                        <div>
+                            <h1 class="text-3xl font-bold text-gradient">Welcome, ${appState.user.name}</h1>
+                            <p class="text-slate-400 text-sm mt-1">Your dropshipping hub</p>
+                        </div>
+                        <div class="relative">
+                            <img src="https://picsum.photos/100/100?random=avatar" class="w-14 h-14 rounded-full ring-2 ring-indigo-500/40">
+                            <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center ring-2 ring-gray-900">${appState.notifications.filter(n=>!n.read).length}</span>
+                        </div>
+                    </header>
+
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="stat-card">
+                            <p class="text-slate-400 text-sm">Fiat balance</p>
+                            <p class="balance-number">${appState.user.balance.toLocaleString()} ₽</p>
+                            <p class="text-xs text-indigo-300 mt-1">≈ ${(appState.user.balance*0.012).toFixed(2)} DRP cashback</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-slate-400 text-sm">DropCoin</p>
+                            <p class="balance-number">${appState.user.cryptoBalance.toFixed(2)} DRP</p>
+                            <p class="text-xs text-purple-300 mt-1">≈ $287.34</p>
+                        </div>
+                    </div>
+
+                    <!-- AI insights card -->
+                    <div class="glass-card p-5 mb-6">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="w-10 h-10 rounded-full bg-indigo-600/30 flex items-center justify-center"><i class="fas fa-robot text-indigo-300"></i></div>
+                            <h2 class="font-semibold">AI market pulse</h2>
+                        </div>
+                        <p class="text-sm text-gray-300 mb-2">⚡ Wireless chargers +142% this week</p>
+                        <p class="text-sm text-gray-300">💰 Increase speaker price to $84.99 for +12% revenue</p>
+                        <button id="open-ai-assistant" class="btn btn-outline w-full mt-3 py-2 text-sm">View insights <i class="fas fa-arrow-right ml-1"></i></button>
+                    </div>
+
+                    <!-- NFT tracked delivery -->
+                    <div class="glass-card-thin p-5 mb-6">
+                        <h3 class="font-semibold flex items-center gap-2 mb-3"><i class="fas fa-box-open text-purple-400"></i> NFT tracked delivery</h3>
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-purple-600/30 flex items-center justify-center"><i class="fas fa-truck"></i></div>
+                            <div class="flex-1">
+                                <p class="font-medium">Order #NFT-4215</p>
+                                <p class="text-xs text-gray-400">Boxberry #TK4215 · In transit</p>
+                                <div class="w-full bg-gray-700 h-1.5 rounded-full mt-2"><div class="bg-purple-500 h-1.5 rounded-full w-3/4"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <h2 class="text-lg font-semibold mb-3 flex items-center gap-2"><i class="fas fa-bell text-indigo-400"></i> Recent</h2>
+                    <div class="space-y-2 mb-6">
+                        ${appState.notifications.slice(0,2).map(n => `
+                            <div class="notification-item ${!n.read ? 'unread' : ''}">
+                                <p class="font-medium">${n.title}</p>
+                                <p class="text-sm text-gray-400">${n.desc} · ${n.time}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <!-- Stores -->
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-lg font-semibold">Your stores</h2>
+                        <button id="create-new-store" class="text-indigo-400 text-sm"><i class="fas fa-plus mr-1"></i>Add</button>
+                    </div>
+                    <div class="glass-card-thin p-4 flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-indigo-600/30 flex items-center justify-center"><i class="fas fa-store"></i></div>
+                            <div><p class="font-medium">${appState.stores[0].name}</p><p class="text-xs text-gray-400">${appState.stores[0].sales} sales</p></div>
+                        </div>
+                        <span class="text-sm bg-indigo-500/20 px-3 py-1 rounded-full">${appState.stores[0].category}</span>
+                    </div>
+                    <div class="glass-card-thin p-6 flex items-center justify-center border border-dashed border-gray-600">
+                        <button id="create-new-store" class="flex flex-col items-center text-gray-400"><i class="fas fa-plus-circle text-2xl mb-1"></i><span class="text-sm">Create new store</span></button>
+                    </div>
+
+                    ${renderNavBar('dashboard')}
+                `;
+            }
+
+            function renderMarket() {
+                return `
+                    <header class="flex items-center gap-3 mb-6">
+                        <button data-navigate="dashboard" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+                        <h1 class="text-2xl font-bold flex-1 text-center">Marketplace</h1>
+                        <button class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-search"></i></button>
+                    </header>
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <div class="stat-card"><p class="text-sm text-gray-400">Products</p><p class="text-2xl font-bold">1,245</p></div>
+                        <div class="stat-card"><p class="text-sm text-gray-400">Stores</p><p class="text-2xl font-bold">189</p></div>
+                    </div>
+                    <h2 class="font-semibold mb-2">Categories</h2>
+                    <div class="flex gap-2 overflow-auto pb-2 mb-4">
+                        <button class="btn-outline py-2 px-4 text-sm rounded-full whitespace-nowrap">All</button>
+                        <button class="btn-outline py-2 px-4 text-sm rounded-full">Electronics</button>
+                        <button class="btn-outline py-2 px-4 text-sm rounded-full">Fashion</button>
+                    </div>
+                    <h2 class="font-semibold mb-3">Trending</h2>
+                    <div class="space-y-3">
+                        ${appState.marketItems.map(item => `
+                            <div class="glass-card-thin p-4">
+                                <div class="flex gap-3"><div class="w-16 h-16 rounded-xl bg-indigo-800/30 flex items-center justify-center"><i class="fas fa-box text-2xl"></i></div>
+                                <div class="flex-1"><h3 class="font-bold">${item.name}</h3><p class="text-sm text-gray-400">${item.store}</p>
+                                <div class="flex justify-between mt-2"><span class="font-bold text-indigo-300">${item.price}</span><span class="text-xs bg-gray-700 px-2 py-1 rounded-full">${item.sales} sold</span></div></div></div>
+                                <div class="flex justify-between mt-3 pt-2 border-t border-white/5"><span class="text-sm text-gray-400">Profit: <span class="text-green-400">${item.profit}</span></span><button class="btn-primary py-1 px-4 text-sm">Add</button></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${renderNavBar('market')}
+                `;
+            }
+
+            function renderWallet() {
+                return `
+                    <header class="flex items-center gap-3 mb-6">
+                        <button data-navigate="dashboard" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+                        <h1 class="text-2xl font-bold flex-1 text-center">Wallet</h1>
+                        <button class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas fa-qrcode"></i></button>
+                    </header>
+                    <div class="glass-card p-6 mb-6 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-purple-600/20"></div>
+                        <p class="text-sm text-gray-300">Total balance</p>
+                        <p class="text-4xl font-bold mt-1">$${appState.portfolio.value.toFixed(2)}</p>
+                        <div class="flex gap-2 mt-4">
+                            <button class="btn-primary py-2 flex-1"><i class="fas fa-arrow-down mr-1"></i>Receive</button>
+                            <button class="btn-primary py-2 flex-1"><i class="fas fa-arrow-up mr-1"></i>Send</button>
+                        </div>
+                    </div>
+                    <h2 class="font-semibold mb-3">Assets</h2>
+                    ${appState.portfolio.coins.map(c => `
+                        <div class="glass-card-thin p-4 flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-indigo-600/30 flex items-center justify-center"><i class="fas fa-coins"></i></div><div><p class="font-medium">${c.name}</p><p class="text-xs text-gray-400">${c.amount} ${c.symbol}</p></div></div>
+                            <p class="font-bold">$${c.value.toFixed(2)}</p>
+                        </div>
+                    `).join('')}
+                    <h2 class="font-semibold mt-6 mb-3 flex items-center gap-2"><i class="fas fa-gem text-purple-400"></i> NFT collection</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="nft-card-modern"><div class="aspect-square rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 mb-2 flex items-center justify-center"><i class="fas fa-crown text-3xl"></i></div><p class="font-medium text-sm">Founder's Pass</p><p class="text-xs text-gray-400">TON</p></div>
+                        <div class="nft-card-modern"><div class="aspect-square rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 mb-2 flex items-center justify-center"><i class="fas fa-trophy text-3xl"></i></div><p class="font-medium text-sm">Top Seller</p><p class="text-xs text-gray-400">TON</p></div>
+                    </div>
+                    <button id="p2p-exchange-btn" class="btn-outline w-full mt-4 py-3"><i class="fas fa-exchange-alt mr-2"></i>P2P Exchange</button>
+                    <div id="p2p-exchange-panel" class="hidden glass-card-thin p-4 mt-3">
+                        <p class="font-medium mb-2">Swap NFT</p>
+                        <select class="input-modern mb-2"><option>Founder's Pass</option></select>
+                        <input class="input-modern mb-2" placeholder="Recipient address">
+                        <button class="btn-primary w-full">Transfer</button>
+                    </div>
+                    ${renderNavBar('wallet')}
+                `;
+            }
+
+            function renderSettings() {
+                return `<div>Settings (minimal)</div>${renderNavBar('settings')}`;
+            }
+            function renderProfile() {
+                return `<div>Profile</div>${renderNavBar('profile')}`;
+            }
+            function renderStore() {
+                return `<div>Store</div>${renderNavBar('store')}`;
+            }
+            function renderProduct() {
+                return `<div>Product</div>${renderNavBar('product')}`;
+            }
+
+            function renderApp() {
+                const appEl = document.getElementById('app');
+                if (routes[appState.currentPage]) {
+                    appEl.innerHTML = routes[appState.currentPage]();
+                    setupEventListeners();
+                } else navigate('dashboard');
+            }
+
+            // Event listeners (unchanged logic, just ensure elements exist)
+            function setupEventListeners() {
+                // nav
+                document.querySelectorAll('[data-navigate]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const page = btn.dataset.navigate;
+                        navigate(page);
+                    });
+                });
+
+                // create button
+                const createBtn = document.getElementById('create-button');
+                if (createBtn) {
+                    createBtn.addEventListener('click', () => {
+                        document.getElementById('create-popup').classList.toggle('hidden');
+                    });
+                }
+
+                // close create popup
+                document.getElementById('close-create-popup')?.addEventListener('click', () => {
+                    document.getElementById('create-popup').classList.add('hidden');
+                });
+
+                // open create store modals
+                document.querySelectorAll('[data-type="telegram-store"]').forEach(b => {
+                    b.addEventListener('click', () => {
+                        document.getElementById('create-popup').classList.add('hidden');
+                        document.getElementById('telegram-store-creation-modal').classList.remove('hidden');
+                    });
+                });
+                document.querySelectorAll('[data-type="store"], #create-new-store').forEach(b => {
+                    b.addEventListener('click', () => {
+                        document.getElementById('create-popup')?.classList.add('hidden');
+                        document.getElementById('store-creation-modal').classList.remove('hidden');
+                    });
+                });
+                document.querySelectorAll('[data-type="nft"]').forEach(b => {
+                    b.addEventListener('click', () => {
+                        document.getElementById('create-popup').classList.add('hidden');
+                        document.getElementById('nft-creation-modal').classList.remove('hidden');
+                    });
+                });
+
+                // close modals
+                document.getElementById('close-store-modal')?.addEventListener('click', () => {
+                    document.getElementById('store-creation-modal').classList.add('hidden');
+                });
+                document.getElementById('close-telegram-store-modal')?.addEventListener('click', () => {
+                    document.getElementById('telegram-store-creation-modal').classList.add('hidden');
+                });
+                document.getElementById('close-nft-modal')?.addEventListener('click', () => {
+                    document.getElementById('nft-creation-modal').classList.add('hidden');
+                });
+
+                // open AI modal
+                document.getElementById('open-ai-assistant')?.addEventListener('click', () => {
+                    document.getElementById('ai-analysis-modal').classList.remove('hidden');
+                });
+                document.querySelectorAll('.close-ai-modal').forEach(b => {
+                    b.addEventListener('click', () => {
+                        document.getElementById('ai-analysis-modal').classList.add('hidden');
+                    });
+                });
+
+                // p2p toggle
+                document.getElementById('p2p-exchange-btn')?.addEventListener('click', () => {
+                    document.getElementById('p2p-exchange-panel').classList.toggle('hidden');
+                });
+
+                // nft design selection (simple)
+                document.querySelectorAll('.nft-design-option').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const rarity = this.dataset.rarity;
+                        document.getElementById('nft-rarity-display').innerText = rarity.charAt(0).toUpperCase() + rarity.slice(1);
+                        // animation placeholder
+                    });
+                });
+            }
+
+            // initial render
+            renderApp();
+        })();
+    </script>
+</body>
+</html>
